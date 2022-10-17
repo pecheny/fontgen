@@ -8,3 +8,4 @@ bin
 *.zip
 test/output/*
 native/hl/*
+native/msdfgen-bin
