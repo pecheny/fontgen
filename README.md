@@ -61,6 +61,8 @@ MSDF provides best accuracy by utilizing RGB channels, all others produce graysc
 * `spacing` - optional and defaults to `1`. Describes spacing between glyphs on the texture in pixels.
 * `options` - optional list of extra configuration flags. See below.
 * `template` - optional file name of config containing "default" values which would be inherited if not defined in main config.
+* `pngName` - use alternative png name instead of `output`.png. Useful in combination with `share` to give a name for shared atlas of several configs. If this property is set in shared config it turns sharing the atlas on.
+* `share` - make this config a template for all other in the given json. Valid in the array of several configs, in the first one only. 
 
 #### Packer configuration
 Optional packer configuration allows to fine-tune atlas creation.

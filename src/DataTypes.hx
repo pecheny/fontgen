@@ -21,7 +21,9 @@ typedef GenConfig = AtlasConfig & {
 	var padding: { top: Null<Int>, bottom: Null<Int>, left: Null<Int>, right: Null<Int> };
 	// TODO: Margin
 	var dfSize:Null<Int>;
-	var template:String;
+	var template:String;//file name of external json config to merge with 
+    var share:Bool;// use this config as template for the following ones
+    var pngName:String;// png file name (same as fnt by default)
 };
 
 typedef AtlasConfig = {

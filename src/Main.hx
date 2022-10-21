@@ -17,7 +17,6 @@ import Render;
 typedef Ctx = {
 	renderers:Array<Render>,
 	glyphs:Array<GlyphInfo>,
-	?pngPath:String
 }
 
 class Main {
@@ -94,7 +93,7 @@ class Main {
 				prepareGlyphs(config);
 		}
 
-		inline function buildAtlas(ctx:Ctx, config:AtlasConfig){
+		inline function buildAtlas(ctx:Ctx, config:GenConfig){
 			var charsetProcess = ts();
 			packGlyphs(config.packer, ctx.glyphs, config.spacing.x, config.spacing.y);
 
@@ -102,16 +101,15 @@ class Main {
 			if (info) Sys.println('[Info] Atlas size: ${atlasWidth}x${atlasHeight}');
 			if (timings) Sys.println("[Timing] Glyph packing: " + timeStr(glyphPacking - charsetProcess));
 
-			ctx.pngPath = Path.withExtension(config.output, "png");
-			renderAtlas(ctx.pngPath, ctx.renderers, config);
+			var pngPath = getTexturePath(config);
+			renderAtlas(pngPath, ctx.renderers, config);
 
 			var glyphRendering = ts();
-			if (info) Sys.println("[Info] Writing PNG file to " + ctx.pngPath);
+			if (info) Sys.println("[Info] Writing PNG file to " + pngPath);
 			if (timings) Sys.println("[Timing] Glyph rendering: " + timeStr(glyphRendering - glyphPacking));
 		}
 
 		if (sharedAtlas) {
-			var sharedCfg = configs[0];
 			var ctxs = [];
 			for (config in configs) {
 				var ctx = createContext(config);
@@ -121,7 +119,6 @@ class Main {
 			var mergedCtxs:Ctx = {
 				renderers: [],
 				glyphs:[],
-				pngPath:Path.withExtension(sharedCfg.output, "png")
 			}
 			for (ctx in ctxs) {
 				for (r in ctx.renderers)
@@ -133,8 +130,7 @@ class Main {
 			for (i in 0...configs.length) {
 				var cfg:GenConfig = configs[i];
 				var ctx = ctxs[i];
-				cfg.spacing = sharedCfg.spacing;
-				writeFntFile(mergedCtxs.pngPath, cfg, ctx.glyphs, cast ctx.renderers[0]);
+				writeFntFile(cfg, ctx.glyphs, cast ctx.renderers[0]);
 			}
 			Msdfgen.unloadFonts();
 		} else {
@@ -142,7 +138,7 @@ class Main {
 				var stamp = ts();
 				var ctx = createContext(config);
 				buildAtlas(ctx, config);
-				writeFntFile(ctx.pngPath, config, ctx.glyphs, cast ctx.renderers[0]);
+				writeFntFile(config, ctx.glyphs, cast ctx.renderers[0]);
 				Msdfgen.unloadFonts();
 				if (timings) {
 					var ttfGen = ts();
@@ -174,7 +170,7 @@ class Main {
 		Msdfgen.endAtlas(pngPath);
 	}
 
-	static function writeFntFile(pngPath, config, glyphs:Array<GlyphInfo>, renderer:Render){
+	static function writeFntFile(config, glyphs:Array<GlyphInfo>, renderer:Render){
 		function addKerning(file, glyphs:Array<GlyphInfo>, renderer:GlyphRender) {
 			final len = glyphs.length;
 			for (i in 0...len) {
@@ -213,7 +209,7 @@ class Main {
 			});
 		}
 
-		file.texture = Path.withoutDirectory(pngPath);
+		file.texture = Path.withoutDirectory(getTexturePath(config));
 		file.textureWidth = atlasWidth;
 		file.textureHeight = atlasHeight;
 
@@ -433,17 +429,51 @@ class Main {
 	
 	static function jsonConfig(inp:String):Array<GenConfig> {
 		var cfg:Dynamic = Json.parse(inp);
-		if (Std.is(cfg, Array)) {
+		if (Std.isOfType(cfg, Array)) {
 			var arr:Array<GenConfig> = cfg;
+			var sharedConfig:GenConfig = null;
+			// if first config has share flag it is using as sources of default values for other configs rather than independend config
+			if (arr.length > 0 && Reflect.hasField(arr[0], "share") && Reflect.field(arr[0], "share")) {
+				sharedConfig = arr.shift();
+				Reflect.deleteField(sharedConfig, "share");
+				if (!isNullOrEmpty(sharedConfig.pngName)) {
+					sharedAtlas = true;
+				}
+			}
 			for (conf in arr) {
+				if (sharedConfig != null)
+					mergeConfig(conf, sharedConfig);
 				fillTemplate(conf);
 				fillDefaults(conf);
+			}
+
+			var source:GenConfig = sharedConfig != null ? sharedConfig : arr[0];
+			if (sharedAtlas) { // fill properties which should be same within one atlas
+				if (isNullOrEmpty(source.pngName))
+					source.pngName = "atlas";
+				for (cfg in arr) {
+					cfg.spacing = source.spacing;
+					cfg.pngName = source.pngName;
+				}
+			} else {
+				for (cfg in arr) {
+                    if (isNullOrEmpty(cfg.pngName))
+					cfg.pngName = Path.withoutExtension(cfg.output);
+				}
 			}
 			return arr;
 		} else {
 			return [fillDefaults(cfg)];
 		}
 	}
+
+    static function mergeConfig(target:GenConfig, source:GenConfig) {
+		for (key in Reflect.fields(source)) {
+			if (!Reflect.hasField(target, key)) {
+				Reflect.setField(target, key, Reflect.field(source, key));
+			}
+		}
+    }
 
 	static function fillTemplate(cfg:GenConfig) {
 		if (cfg.template == null)
@@ -453,15 +483,10 @@ class Main {
 			return;
 		}
 		var template = Json.parse (File.getContent(cfg.template));
-		for (key in Reflect.fields(template)) {
-			if (!Reflect.hasField(cfg, key)) {
-				Reflect.setField(cfg, key, Reflect.field(template, key));
-			}
-		}
+        mergeConfig(cfg, template);
 	}
 	
 	static function fillDefaults(cfg:GenConfig):GenConfig {
-
 		if ( cfg.mode == null ) cfg.mode = MSDF;
 		else {
 			cfg.mode = (cfg.mode:String).toLowerCase();
@@ -554,6 +579,18 @@ class Main {
 	static function idSort(a:GlyphInfo, b:GlyphInfo):Int
 	{
 		return a.char - b.char;
+	}
+
+	static function isNullOrEmpty(s:String) {
+		return s == null || s == "";
+	}
+
+	static function getTexturePath(cfg:GenConfig) {
+		if (isNullOrEmpty(cfg.pngName)) {
+			return Path.withExtension(cfg.output, "png");
+		}
+		var path = Path.directory(cfg.output);
+		return Path.withExtension(Path.join([path, cfg.pngName]), "png");
 	}
 	
 }
