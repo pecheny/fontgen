@@ -1,0 +1,34 @@
+[
+    {
+        "share": true,
+        "pngName":"atlas.png",
+        "charset": [
+            "latin"
+        ],
+        "options": [],
+        "fontSize": 24,
+        "padding": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+        },
+        "spacing": {
+            "x": 2,
+            "y": 2
+        },
+        "mode": "raster"
+    },
+    {
+        "inputs": [
+            "ttf/RobotoSlab-Regular.ttf"
+        ],
+        "output": "output/RobotoSlab.fnt"
+    },
+    {
+        "inputs": [
+            "ttf/RobotoSlab-Bold.ttf"
+        ],
+        "output": "output/RobotoSlab-bold.fnt"
+    }
+]
