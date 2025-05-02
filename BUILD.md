@@ -8,7 +8,7 @@
 ```
 git submodule update --init --recursive
 cmake native/msdfgen --preset=win32
-cmake --build build/win32 --config Release
+cmake --build native/msdfgen/build/win32 --config Release
 pushd native
 nmake Makefile.win # run in msvc console or add vcvars.cmd && before command
 popd
