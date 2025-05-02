@@ -1,5 +1,0 @@
-common.hxml
--D hlc
--D ammer.hl.build=native/hl
--D ammer.hl.output=bin/
--hl bin/hlc/fontgen.c
