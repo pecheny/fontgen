@@ -76,7 +76,7 @@ LIB_EXPORT void wrap_deinitializeFreetype() {
 }
 
 
-LIB_EXPORT int initFont(char* filename, unsigned char* metrics_data, int fontSize) {
+LIB_EXPORT int initFont(const char* filename, unsigned char* metrics_data, int fontSize) {
 	FontHandle* msdfHandle = loadFont(ft, filename);
 	if (msdfHandle != NULL) {
 		int index = fonts.size();
@@ -178,7 +178,7 @@ LIB_EXPORT void beginAtlas(int atlasWidth, int atlasHeight, int defaultColor, bo
 	}
 }
 
-LIB_EXPORT void endAtlas(char* output) {
+LIB_EXPORT void endAtlas(const char* output) {
     msdfgen::savePng(atlasPixels, output);
 }
 
