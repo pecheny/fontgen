@@ -106,6 +106,11 @@ class Main {
 				Sys.println("[Timing] Glyph packing: " + timeStr(glyphPacking - charsetProcess));
 
 			var pngPath = getTexturePath(config);
+            var dirPath = Path.directory(pngPath);
+
+            if (!FileSystem.exists(dirPath))
+                FileSystem.createDirectory(dirPath);
+
 			renderAtlas(pngPath, ctx.renderers, config);
 
 			var glyphRendering = ts();
