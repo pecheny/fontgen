@@ -1,9 +1,10 @@
 all: msdfgen_lib.dll
 
 msdfgen_lib.dll: msdfgen_lib.obj
-	cl /LD /MT msdfgen_lib.obj "msdfgen-bin\Release\msdfgen-core.lib" "msdfgen-bin\Release\msdfgen-ext.lib" "msdfgen\freetype\win32\freetype.lib"
+	cl /LD /MT msdfgen_lib.obj "msdfgen\build\win32\vcpkg_installed\x86-windows-static\lib\bentleyottmann.lib" "msdfgen\build\win32\vcpkg_installed\x86-windows-static\lib\brotlicommon.lib"  "msdfgen\build\win32\vcpkg_installed\x86-windows-static\lib\brotlidec.lib"     "msdfgen\build\win32\vcpkg_installed\x86-windows-static\lib\brotlienc.lib"     "msdfgen\build\win32\vcpkg_installed\x86-windows-static\lib\bz2.lib"           "msdfgen\build\win32\vcpkg_installed\x86-windows-static\lib\freetype.lib"      "msdfgen\build\win32\vcpkg_installed\x86-windows-static\lib\GlU32.Lib"         "msdfgen\build\win32\vcpkg_installed\x86-windows-static\lib\jpeg.lib"          "msdfgen\build\win32\vcpkg_installed\x86-windows-static\lib\libexpatMT.lib"    "msdfgen\build\win32\vcpkg_installed\x86-windows-static\lib\libpng16.lib"      "msdfgen\build\win32\vcpkg_installed\x86-windows-static\lib\libsharpyuv.lib"   "msdfgen\build\win32\vcpkg_installed\x86-windows-static\lib\libwebp.lib"       "msdfgen\build\win32\vcpkg_installed\x86-windows-static\lib\libwebpdecoder.lib" "msdfgen\build\win32\vcpkg_installed\x86-windows-static\lib\libwebpdemux.lib"  "msdfgen\build\win32\vcpkg_installed\x86-windows-static\lib\libwebpmux.lib"    "msdfgen\build\win32\vcpkg_installed\x86-windows-static\lib\OpenGL32.Lib"      "msdfgen\build\win32\vcpkg_installed\x86-windows-static\lib\skia.lib"          "msdfgen\build\win32\vcpkg_installed\x86-windows-static\lib\skottie.lib"       "msdfgen\build\win32\vcpkg_installed\x86-windows-static\lib\sksg.lib"          "msdfgen\build\win32\vcpkg_installed\x86-windows-static\lib\skshaper.lib"      "msdfgen\build\win32\vcpkg_installed\x86-windows-static\lib\svg.lib"           "msdfgen\build\win32\vcpkg_installed\x86-windows-static\lib\tinyxml2.lib"      "msdfgen\build\win32\vcpkg_installed\x86-windows-static\lib\turbojpeg.lib"     "msdfgen\build\win32\vcpkg_installed\x86-windows-static\lib\zlib.lib"          "msdfgen\build\win32\Release\msdfgen-core.lib" "msdfgen\build\win32\Release\msdfgen-ext.lib"
+
 
 msdfgen_lib.obj: msdfgen_lib.cpp
-	cl /c /MT msdfgen_lib.cpp /I . /I "msdfgen\freetype\include" /I "msdfgen\include" /I "msdfgen/ext"
+	cl /c /MT msdfgen_lib.cpp /I . /I "msdfgen\build\win32\vcpkg_installed\x86-windows-static\include\freetype\include" /I "msdfgen\build\win32\vcpkg_installed\x86-windows-static\include" /I "msdfgen/ext"
 
 .PHONY: all

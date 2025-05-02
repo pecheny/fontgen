@@ -1,2 +1,4 @@
 common.hxml
+-D HXCPP_X86=true
+-D HXCPP_M32=true
 -cpp bin/cpp

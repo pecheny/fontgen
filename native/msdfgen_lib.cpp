@@ -7,7 +7,7 @@
 #include "msdfgen/ext/import-svg.h"
 #include "msdfgen/msdfgen-ext.h"
 #include <ft2build.h>
-#include <lodepng.h>
+#include <save-png.h>
 #include FT_FREETYPE_H
 #include FT_OUTLINE_H
 #include FT_TRUETYPE_TABLES_H
@@ -179,9 +179,7 @@ LIB_EXPORT void beginAtlas(int atlasWidth, int atlasHeight, int defaultColor, bo
 }
 
 LIB_EXPORT void endAtlas(char* output) {
-	const unsigned char* pixels = (const unsigned char*)atlasPixels;
-	lodepng::encode(output, pixels, atlasPixels.width(), atlasPixels.height(), LCT_RGBA);
-	// TODO: Optimization: Save in appropriate format - grayscale (SDF/PSDF), RGB (MSDF) and RGBA for raster.
+    msdfgen::savePng(atlasPixels, output);
 }
 
 void normalizeShape(Shape &shape) {

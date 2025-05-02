@@ -4,6 +4,24 @@ import ammer.Library;
 import haxe.io.Bytes;
 import ammer.ffi.*;
 
+@:buildXml('
+<target id="haxe">
+  <libpath name="../../native/msdfgen/build/win32/vcpkg_installed/x86-windows-static/lib"/>
+  <libpath name="../../native/msdfgen/build/win32/Release"/>
+  <lib name="msdfgen_lib.lib" if="windows" />
+  <lib name="msdfgen-core.lib" if="windows" />
+  <lib name="msdfgen-ext.lib" if="windows" />
+  <lib name="libpng16.lib" if="windows" />
+  <lib name="freetype.lib" if="windows" />
+
+  <lib name="tinyxml2.lib" if="windows" />
+  <lib name="skia.lib" if="windows" />
+  <lib name="zlib.lib" if="windows" />
+  <lib name="bz2.lib" if="windows" />
+  <lib name="brotlicommon.lib" if="windows" />
+  <lib name="brotlidec.lib" if="windows" />
+</target>
+')
 class Msdfgen extends Library<"msdfgen_lib"> {
 	
 	@:ammer.native("wrap_initializeFreetype")
