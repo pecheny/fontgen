@@ -295,6 +295,8 @@ LIB_EXPORT bool generateMSDFGlyph(int slot, int charcode, int width, int height,
 LIB_EXPORT bool rasterizeGlyph(int slot, int charcode, int width, int height, int ox, int oy) {
 	if (width == 0 || height == 0) return true;
 	
+	const BitmapRef<byte, 4> atlas = atlasPixels;
+    int ah = atlas.height;
 	FT_Error err = FT_Load_Char(fonts[slot]->ft, charcode, FT_LOAD_RENDER);
 	if (err) return false;
 	FT_Bitmap* bitmap = &fonts[slot]->ft->glyph->bitmap;
@@ -310,7 +312,7 @@ LIB_EXPORT bool rasterizeGlyph(int slot, int charcode, int width, int height, in
 		case FT_PIXEL_MODE_GRAY:
 			if (enforceR8) {
 				for (int y = 0; y < height; y++) {
-					byte* it = atlasPixels(ox, oy + y);
+					byte* it = atlasPixels(ox, ah - (oy + y + 1));
 					for (int x = 0; x < width; x++) {
 						unsigned char px = bitmap->buffer[(y) * bitmap->width + x] * multiplier;
 						*it++ = px;
@@ -321,7 +323,7 @@ LIB_EXPORT bool rasterizeGlyph(int slot, int charcode, int width, int height, in
 				}
 			} else {
 				for (int y = 0; y < height; y++) {
-					byte* it = atlasPixels(ox, oy + y);
+					byte* it = atlasPixels(ox,  ah - (oy + y + 1));
 					for (int x = 0; x < width; x++) {
 						unsigned char px = bitmap->buffer[(y) * bitmap->width + x] * multiplier;
 						*it++ = 0xff;
