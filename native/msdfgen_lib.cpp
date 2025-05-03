@@ -195,12 +195,13 @@ void normalizeShape(Shape &shape) {
 }
 
 inline void copyGrayBitmapToAtlas(Bitmap<float, 1> sdf, int width, int height, int ox, int oy, bool ccw) {
-		oy += height;
+        const BitmapRef<byte, 4> atlas = atlasPixels;
+        int ah = atlas.height;
 		if (ccw) {
-			for (int y = height - 1; y >= 0; y--) {
-				byte* it = atlasPixels(ox, oy - y);
+            for (int y = 1; y <= height; y++) {
+                byte* it = atlasPixels(ox, ah - (oy + y));
 				for (int x = 0; x < width; x++) {
-					byte px = pixelFloatToByte(1.f - *sdf(x, y));
+					byte px = pixelFloatToByte(1.f - *sdf(x, height - y));
 					*it++ = px;
 					*it++ = px;
 					*it++ = px;
@@ -208,10 +209,10 @@ inline void copyGrayBitmapToAtlas(Bitmap<float, 1> sdf, int width, int height, i
 				}
 			}
 		} else {
-			for (int y = height - 1; y >= 0; y--) {
-				byte* it = atlasPixels(ox, oy - y);
+            for (int y = 1; y <= height; y++) {
+                byte* it = atlasPixels(ox, ah - (oy + y));
 				for (int x = 0; x < width; x++) {
-					byte px = pixelFloatToByte(*sdf(x, y));
+					byte px = pixelFloatToByte(*sdf(x, height - y));
 					*it++ = px;
 					*it++ = px;
 					*it++ = px;
@@ -222,29 +223,29 @@ inline void copyGrayBitmapToAtlas(Bitmap<float, 1> sdf, int width, int height, i
 }
 
 inline void copyColorBitmapToAtlas(Bitmap<float, 3> msdf, int width, int height, int ox, int oy, bool ccw){
-		oy += height;
+        const BitmapRef<byte, 4> atlas = atlasPixels;
+        int ah = atlas.height;
 		if (ccw) {
-			for (int y = height - 1; y >= 0; y--) {
-				byte* it = atlasPixels(ox, oy - y);
+            for (int y = 1; y <= height; y++) {
+                byte* it = atlasPixels(ox, ah - (oy + y));
 				for (int x = 0; x < width; x++) {
-					*it++ = pixelFloatToByte(1.f - msdf(x, y)[0]);
-					*it++ = pixelFloatToByte(1.f - msdf(x, y)[1]);
-					*it++ = pixelFloatToByte(1.f - msdf(x, y)[2]);
+					*it++ = pixelFloatToByte(1.f - msdf(x, height - y)[0]);
+					*it++ = pixelFloatToByte(1.f - msdf(x, height - y)[1]);
+					*it++ = pixelFloatToByte(1.f - msdf(x, height - y)[2]);
 					*it++ = 0xff;
 				}
 			}
 		} else {
-			for (int y = height - 1; y >= 0; y--) {
-				byte* it = atlasPixels(ox, oy - y);
+            for (int y = 1; y <= height; y++) {
+                byte* it = atlasPixels(ox, ah - (oy + y));
 				for (int x = 0; x < width; x++) {
-					*it++ = pixelFloatToByte(msdf(x, y)[0]);
-					*it++ = pixelFloatToByte(msdf(x, y)[1]);
-					*it++ = pixelFloatToByte(msdf(x, y)[2]);
+					*it++ = pixelFloatToByte(msdf(x, height - y)[0]);
+					*it++ = pixelFloatToByte(msdf(x, height - y)[1]);
+					*it++ = pixelFloatToByte(msdf(x, height - y)[2]);
 					*it++ = 0xff;
 				}
 			}
 		}
-
 }
 
 LIB_EXPORT bool generateSDFGlyph(int slot, int charcode, int width, int height, int ox, int oy, double tx, double ty, bool ccw, double range) {
