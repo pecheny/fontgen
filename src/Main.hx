@@ -95,7 +95,7 @@ class Main {
 			return if (config.svgInput != null) prepareSvgGlyphs(config); else prepareGlyphs(config);
 		}
 
-		inline function buildAtlas(ctx:Ctx, config:GenConfig) {
+		inline function buildAtlas(ctx:Ctx, config:GenConfig, sharedAtlas = false) {
 			var charsetProcess = ts();
 			packGlyphs(config.packer, ctx.glyphs, config.spacing.x, config.spacing.y);
 
@@ -105,12 +105,11 @@ class Main {
 			if (timings)
 				Sys.println("[Timing] Glyph packing: " + timeStr(glyphPacking - charsetProcess));
 
-			var pngPath = getTexturePath(config);
-            var dirPath = Path.directory(pngPath);
-
+            var dirPath = Path.directory(config.output);
             if (!FileSystem.exists(dirPath))
                 FileSystem.createDirectory(dirPath);
 
+			var pngPath = getTexturePath(config, sharedAtlas);
 			renderAtlas(pngPath, ctx.renderers, config);
 
 			var glyphRendering = ts();
@@ -137,7 +136,7 @@ class Main {
 				for (r in ctx.glyphs)
 					mergedCtxs.glyphs.push(r);
 			}
-			buildAtlas(mergedCtxs, configs[0]);
+			buildAtlas(mergedCtxs, configs[0], true);
 			for (i in 0...configs.length) {
 				var cfg:GenConfig = configs[i];
 				var ctx = ctxs[i];
@@ -220,7 +219,7 @@ class Main {
 			});
 		}
 
-		file.texture = Path.withoutDirectory(getTexturePath(config));
+		file.texture = Path.withoutDirectory(getTexturePath(config, sharedAtlas));
 		file.textureWidth = atlasWidth;
 		file.textureHeight = atlasHeight;
 
@@ -479,8 +478,8 @@ class Main {
 				}
 			} else {
 				for (cfg in arr) {
-					if (isNullOrEmpty(cfg.pngName))
-						cfg.pngName = Path.withoutExtension(cfg.output);
+                    if (isNullOrEmpty(cfg.pngName))
+                        cfg.pngName = Path.withoutExtension(Path.withoutDirectory(cfg.output));
 				}
 			}
 			return arr;
@@ -626,11 +625,11 @@ class Main {
 		return s == null || s == "";
 	}
 
-	static function getTexturePath(cfg:GenConfig) {
-		if (isNullOrEmpty(cfg.pngName)) {
-			return Path.withExtension(cfg.output, "png");
-		}
-		var path = Path.directory(cfg.output);
-		return Path.withExtension(Path.join([path, cfg.pngName]), "png");
+	static function getTexturePath(cfg:GenConfig, sharedAtlas) {
+        trace(cfg.pngName);
+        return if (sharedAtlas) 
+            Path.withExtension(cfg.pngName, "png"); 
+        else
+            Path.withExtension(Path.join([Path.directory(cfg.output), cfg.pngName]), "png");
 	}
 }
